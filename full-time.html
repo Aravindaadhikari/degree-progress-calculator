@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full-Time Degree Progress & Target Calculator</title>
+<style>
+:root {
+  --purple:#5b2c83;
+  --purple-dark:#432061;
+  --purple-soft:#f4eff7;
+  --ink:#222;
+  --muted:#666;
+  --line:#d8d8df;
+  --soft:#f7f7f9;
+  --good:#176b3a;
+  --danger:#9d1d20;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; font-family:Arial,Helvetica,sans-serif; color:var(--ink);
+  background:#fff; line-height:1.45;
+}
+header { background:var(--purple); color:#fff; }
+.wrap { max-width:1100px; margin:0 auto; padding:0 20px; }
+header .wrap { padding-top:19px; padding-bottom:19px; }
+h1 { margin:0; font-size:1.6rem; }
+main { padding:26px 20px 40px !important; }
+.intro { margin-bottom:18px; }
+.notice {
+  background:var(--purple-soft); border-left:5px solid var(--purple);
+  padding:13px 15px; margin:16px 0;
+}
+details {
+  border:1px solid var(--line); border-radius:6px; margin:10px 0;
+}
+summary {
+  cursor:pointer; padding:11px 13px; font-weight:700; color:var(--purple-dark);
+}
+.inside { padding:0 13px 13px; }
+.card {
+  border:1px solid var(--line); border-radius:8px; padding:18px;
+  margin:18px 0; background:#fff;
+}
+.card h2 { color:var(--purple-dark); font-size:1.2rem; margin:0 0 14px; }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.grid.two { grid-template-columns:repeat(2,1fr); }
+@media(max-width:820px) { .grid,.grid.two { grid-template-columns:1fr; } }
+.field label { display:block; font-weight:700; margin-bottom:6px; }
+select,textarea {
+  width:100%; border:1px solid #aaa; border-radius:4px;
+  padding:10px; font-size:1rem; background:#fff;
+}
+textarea { min-height:105px; resize:vertical; }
+textarea:disabled { background:#eee; color:#888; }
+.hint,.small { color:var(--muted); font-size:.9rem; margin-top:6px; }
+.stagebox {
+  margin-top:13px; background:var(--soft); border-radius:6px; padding:10px 12px;
+}
+.actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+button {
+  border:0; border-radius:4px; padding:10px 15px; font-weight:700; cursor:pointer;
+}
+.primary { background:var(--purple); color:#fff; }
+.secondary { background:#ececec; color:#222; }
+.outline { background:#fff; color:var(--purple-dark); border:1px solid var(--purple); }
+.error { margin-top:10px; color:var(--danger); font-weight:700; }
+.ok { color:var(--good); }
+.status-grid {
+  display:grid; grid-template-columns:240px 1fr; gap:8px 16px;
+}
+@media(max-width:650px) { .status-grid { grid-template-columns:1fr; } }
+.key { color:var(--muted); }
+.big { font-weight:700; font-size:1.35rem; color:var(--purple-dark); }
+table { width:100%; border-collapse:collapse; }
+th,td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { background:#f3f1f5; }
+.scenario { display:block; margin:3px 0; }
+.best { color:var(--good); font-weight:700; }
+.badge {
+  display:inline-block; background:#eee; border-radius:999px; padding:2px 7px;
+  font-size:.8rem; margin-left:4px;
+}
+footer {
+  border-top:1px solid var(--line); margin-top:28px; padding:18px 0;
+  color:var(--muted); font-size:.9rem;
+}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>Full-Time Degree Progress & Target Calculator</h1></div></header>
+
+<main class="wrap">
+  <section class="intro">
+    <p>Use this tool to estimate your current GPA and explore the marks you may need in your remaining Level 6 modules.</p>
+
+    <div class="notice">
+      <strong>Important:</strong> This calculator provides an indicative estimate only. It should not be taken as a definitive prediction of your final degree classification. Level 4 marks do not contribute to the final classification.
+    </div>
+
+    <details>
+      <summary>How to use this calculator</summary>
+      <div class="inside">
+        Select your current stage, then enter exactly the number of marks shown. Only marks expected to have been released at that stage are accepted.
+      </div>
+    </details>
+
+    <details>
+      <summary>How this is calculated</summary>
+      <div class="inside">
+        One lowest module mark is disregarded across Levels 5 and 6. The final CGPA is calculated as one-third of the Level 5 average plus two-thirds of the Level 6 average. Where future marks are unknown, alternative target scenarios are shown depending on where the disregarded mark eventually falls.
+      </div>
+    </details>
+
+    <details>
+      <summary>Stage release pattern</summary>
+      <div class="inside">FT release pattern: L5 S1 = 0 marks; L5 S2 = 3 L5 marks; L6 S1 = 6 L5 marks; L6 S2 = 6 L5 + 3 L6 marks.</div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>1. Select your stage</h2>
+    <div class="grid">
+      
+        <div class="field">
+          <label for="level">Level</label>
+          <select id="level">
+            <option value="5">Level 5</option>
+            <option value="6">Level 6</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="semester">Semester</label>
+          <select id="semester">
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+          </select>
+        </div>
+        
+      <div class="field">
+        <label for="status">Completion status</label>
+        <select id="status">
+          <option value="stage">Up to selected stage</option>
+          <option value="final">Degree complete</option>
+        </select>
+      </div>
+    </div>
+    <div id="stageInfo" class="stagebox"></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Enter your marks</h2>
+    <div class="grid two">
+      <div class="field">
+        <label for="l5">Level 5 marks</label>
+        <textarea id="l5" placeholder="Enter marks separated by spaces, commas or new lines"></textarea>
+        <div id="l5hint" class="hint"></div>
+      </div>
+      <div class="field">
+        <label for="l6">Level 6 marks</label>
+        <textarea id="l6" placeholder="Enter marks separated by spaces, commas or new lines"></textarea>
+        <div id="l6hint" class="hint"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="calcBtn" class="primary">Calculate</button>
+      <button id="resetBtn" class="secondary">Reset</button>
+      <button id="saveBtn" class="outline">Save marks</button>
+      <button id="loadBtn" class="outline">Load saved marks</button>
+    </div>
+    <div id="message" class="error"></div>
+    <div class="small">Saved marks remain only in this browser on this device.</div>
+  </section>
+
+  <section class="card">
+    <h2>3. Current status</h2>
+    <div id="currentBlock" class="status-grid">
+      <div class="key">Current GPA</div>
+      <div>Enter the required marks and select Calculate.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. Target calculator</h2>
+    <p class="small">
+      The lowest target is highlighted in bold. The final disregarded module may be in Level 5, in an already-known Level 6 mark, or in a future Level 6 mark.
+      If Level 5 is not yet complete, the projection assumes the remaining Level 5 marks are equal to the average of the Level 5 marks entered so far.
+    </p>
+    <div id="summaryLine" class="stagebox"></div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Classification</th>
+            <th>Threshold</th>
+            <th>Required average</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Independent planning tool for indicative guidance only. It does not replace official University regulations, progression decisions or award-board outcomes.
+  </footer>
+</main>
+
+<script>
+(function(){
+  const STORAGE_KEY = "westminster_gpa_ft_v1";
+  const PRIMARY_ID = "level";
+
+  function parseNums(text){
+    if(!text.trim()) return [];
+    return text.trim().split(/[,\s]+/).filter(Boolean).map(x=>{
+      const n = Number(x);
+      if(!Number.isFinite(n)) throw new Error("'" + x + "' is not a valid number.");
+      if(n < 0 || n > 100) throw new Error("Marks must be between 0 and 100.");
+      return n;
+    });
+  }
+
+  const avg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : 0;
+  const sum = a => a.reduce((x,y)=>x+y,0);
+
+  function dropOneMin(a){
+    if(!a.length) return {kept:[], dropped:null};
+    const m = Math.min(...a);
+    const i = a.indexOf(m);
+    return {kept:a.slice(0,i).concat(a.slice(i+1)), dropped:m};
+  }
+
+  
+        function expectedCounts(status, a, sem){
+          if(status === 'final') return {L5:6,L6:6,remL6:0,label:'Degree complete'};
+          const level = Number(a);
+          sem = Number(sem);
+          if(level === 5 && sem === 1) return {L5:0,L6:0,remL6:6,label:'Level 5, Semester 1'};
+          if(level === 5 && sem === 2) return {L5:3,L6:0,remL6:6,label:'Level 5, Semester 2'};
+          if(level === 6 && sem === 1) return {L5:6,L6:0,remL6:6,label:'Level 6, Semester 1'};
+          return {L5:6,L6:3,remL6:3,label:'Level 6, Semester 2'};
+        }
+        
+
+  function getCounts(){
+    return expectedCounts(
+      document.getElementById('status').value,
+      document.getElementById(PRIMARY_ID).value,
+      document.getElementById('semester').value
+    );
+  }
+
+  function updateStageUI(){
+    const c = getCounts();
+    const l5 = document.getElementById('l5');
+    const l6 = document.getElementById('l6');
+
+    document.getElementById('l5hint').textContent =
+      c.L5 === 0 ? 'No Level 5 marks should be entered at this stage.' : 'Enter exactly ' + c.L5 + ' Level 5 mark(s).';
+
+    document.getElementById('l6hint').textContent =
+      c.L6 === 0 ? 'No Level 6 marks should be entered at this stage.' : 'Enter exactly ' + c.L6 + ' Level 6 mark(s).';
+
+    if(c.L5 === 0){ l5.value=''; l5.disabled=true; } else l5.disabled=false;
+    if(c.L6 === 0){ l6.value=''; l6.disabled=true; } else l6.disabled=false;
+
+    document.getElementById('stageInfo').textContent =
+      c.label + ': enter ' + c.L5 + ' Level 5 mark(s) and ' + c.L6 + ' Level 6 mark(s).';
+
+    setMessage('');
+  }
+
+  function setMessage(msg, ok=false){
+    const el = document.getElementById('message');
+    el.textContent = msg;
+    el.className = ok ? 'error ok' : 'error';
+  }
+
+  function validateCounts(l5,l6,c){
+    if(l5.length !== c.L5) throw new Error('Please enter exactly ' + c.L5 + ' Level 5 mark(s) for this stage.');
+    if(l6.length !== c.L6) throw new Error('Please enter exactly ' + c.L6 + ' Level 6 mark(s) for this stage.');
+  }
+
+  function currentGPA(l5,l6){
+    if(!l5.length && !l6.length) return {none:true};
+
+    if(l5.length && !l6.length){
+      if(l5.length === 1) return {mode:'single', cgpa:l5[0], l5avg:l5[0], l6avg:null, dropLevel:null, dropped:null};
+      const d = dropOneMin(l5);
+      return {mode:'single', cgpa:avg(d.kept), l5avg:avg(d.kept), l6avg:null, dropLevel:'L5', dropped:d.dropped};
+    }
+
+    if(!l5.length && l6.length){
+      if(l6.length === 1) return {mode:'single', cgpa:l6[0], l5avg:null, l6avg:l6[0], dropLevel:null, dropped:null};
+      const d = dropOneMin(l6);
+      return {mode:'single', cgpa:avg(d.kept), l5avg:null, l6avg:avg(d.kept), dropLevel:'L6', dropped:d.dropped};
+    }
+
+    const min5 = Math.min(...l5);
+    const min6 = Math.min(...l6);
+    let dropLevel, dropped;
+
+    if(min5 <= min6){
+      const i = l5.indexOf(min5);
+      l5 = l5.slice(0,i).concat(l5.slice(i+1));
+      dropLevel='L5'; dropped=min5;
+    } else {
+      const i = l6.indexOf(min6);
+      l6 = l6.slice(0,i).concat(l6.slice(i+1));
+      dropLevel='L6'; dropped=min6;
+    }
+
+    const l5avg = avg(l5);
+    const l6avg = avg(l6);
+    return {
+      mode:'weighted',
+      cgpa:(l5avg/3)+(2*l6avg/3),
+      l5avg, l6avg, dropLevel, dropped
+    };
+  }
+
+  function fmt(v){
+    if(v === null) return '—';
+    if(v > 100) return v.toFixed(2) + ' (not achievable)';
+    if(v < 0) return 'Already secured';
+    return v.toFixed(2);
+  }
+
+  function targetRows(c,l5,l6){
+    const thresholds = [
+      ['First',70],
+      ['Upper Second (2:1)',60],
+      ['Lower Second (2:2)',50]
+    ];
+
+    if(c.remL6 === 0){
+      return thresholds.map(([name,thr])=>({
+        name,thr,scenarios:[],best:null,summary:'All Level 6 marks are complete.'
+      }));
+    }
+
+    let l5p = l5.slice();
+    if(l5p.length < 6){
+      const proxy = l5p.length ? avg(l5p) : 50;
+      while(l5p.length < 6) l5p.push(proxy);
+    }
+
+    const l5All = avg(l5p);
+    const l5Drop = avg(dropOneMin(l5p).kept);
+    const ksum = sum(l6);
+    const kmin = l6.length ? Math.min(...l6) : null;
+    const n = c.remL6;
+
+    return thresholds.map(([name,thr])=>{
+      let scenarios;
+
+      if(l6.length === 0){
+        scenarios = [
+          {key:'l5', label:'Drop in L5', value:(3*thr-l5Drop)/2},
+          {key:'l6', label:'Drop in L6', value:(3*thr-l5All)/2}
+        ];
+      } else {
+        const l5drop = (9*thr - 3*l5Drop - ksum) / n;
+        const known = (15*thr - 5*l5All - 2*(ksum-kmin)) / (2*n);
+        const future = n > 1 ? (15*thr - 5*l5All - 2*ksum) / (2*(n-1)) : null;
+        scenarios = [
+          {key:'l5', label:'Drop in L5', value:l5drop},
+          {key:'known', label:'Drop in L6 (known)', value:known},
+          {key:'future', label:'Drop in L6 (future)', value:future}
+        ];
+      }
+
+      const available = scenarios.filter(s=>s.value !== null);
+      const sorted = available.slice().sort((a,b)=>a.value-b.value);
+      const best = sorted[0] || null;
+      const worst = sorted[sorted.length-1] || null;
+
+      let summary = '';
+      if(best) summary += 'Best case: ' + fmt(best.value) + ' (' + best.label + '). ';
+      if(worst) summary += 'Worst case: ' + fmt(worst.value) + ' (' + worst.label + ').';
+
+      return {name,thr,scenarios,best,summary};
+    });
+  }
+
+  function renderTargets(rows){
+    document.getElementById('resultsBody').innerHTML = rows.map(r=>{
+      const scenarioHtml = r.scenarios.length ? r.scenarios.map(s=>{
+        const cls = r.best && r.best.key === s.key ? 'scenario best' : 'scenario';
+        return '<span class="' + cls + '">' + fmt(s.value) + '<span class="badge">' + s.label + '</span></span>';
+      }).join('') : '—';
+
+      return '<tr>' +
+        '<td>' + r.name + '</td>' +
+        '<td>≥ ' + r.thr + '</td>' +
+        '<td>' + scenarioHtml + '</td>' +
+        '<td>' + r.summary + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function calculate(){
+    try {
+      setMessage('');
+      const c = getCounts();
+      const l5 = parseNums(document.getElementById('l5').value);
+      const l6 = parseNums(document.getElementById('l6').value);
+      validateCounts(l5,l6,c);
+
+      const cur = currentGPA(l5.slice(),l6.slice());
+
+      if(cur.none){
+        document.getElementById('currentBlock').innerHTML =
+          '<div class="key">Stage</div><div>' + c.label + '</div>' +
+          '<div class="key">Current GPA</div><div>No marks are available at this stage.</div>';
+      } else {
+        const drop = cur.dropLevel ? cur.dropLevel + ' (' + cur.dropped.toFixed(2) + ')' : 'None';
+        const label = cur.mode === 'weighted' ? 'Weighted degree CGPA' : 'Current GPA';
+        document.getElementById('currentBlock').innerHTML =
+          '<div class="key">Stage</div><div>' + c.label + '</div>' +
+          '<div class="key">Disregarded mark</div><div>' + drop + '</div>' +
+          '<div class="key">Level 5 average used</div><div>' + (cur.l5avg===null?'—':cur.l5avg.toFixed(2)) + '</div>' +
+          '<div class="key">Level 6 average used</div><div>' + (cur.l6avg===null?'—':cur.l6avg.toFixed(2)) + '</div>' +
+          '<div class="key">' + label + '</div><div class="big">' + cur.cgpa.toFixed(2) + '</div>';
+      }
+
+      document.getElementById('summaryLine').textContent =
+        'Using ' + c.L5 + ' Level 5 mark(s) and ' + c.L6 + ' Level 6 mark(s). Remaining Level 6 modules: ' + c.remL6 + '.';
+
+      renderTargets(targetRows(c,l5,l6));
+
+    } catch(err) {
+      setMessage(err.message);
+    }
+  }
+
+  function resetAll(){
+    document.getElementById('l5').value='';
+    document.getElementById('l6').value='';
+    document.getElementById('resultsBody').innerHTML='';
+    document.getElementById('summaryLine').textContent='';
+    document.getElementById('currentBlock').innerHTML =
+      '<div class="key">Current GPA</div><div>Enter the required marks and select Calculate.</div>';
+    setMessage('');
+    updateStageUI();
+  }
+
+  function saveMarks(){
+    const data = {
+      primary:document.getElementById(PRIMARY_ID).value,
+      semester:document.getElementById('semester').value,
+      status:document.getElementById('status').value,
+      l5:document.getElementById('l5').value,
+      l6:document.getElementById('l6').value
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setMessage('Marks saved in this browser.', true);
+  }
+
+  function loadMarks(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) {
+      setMessage('No saved marks were found in this browser.');
+      return;
+    }
+    const d = JSON.parse(raw);
+    document.getElementById(PRIMARY_ID).value = d.primary;
+    document.getElementById('semester').value = d.semester;
+    document.getElementById('status').value = d.status;
+    updateStageUI();
+    document.getElementById('l5').value = d.l5 || '';
+    document.getElementById('l6').value = d.l6 || '';
+    setMessage('Saved marks loaded.', true);
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    document.getElementById(PRIMARY_ID).addEventListener('change', updateStageUI);
+    document.getElementById('semester').addEventListener('change', updateStageUI);
+    document.getElementById('status').addEventListener('change', updateStageUI);
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('saveBtn').addEventListener('click', saveMarks);
+    document.getElementById('loadBtn').addEventListener('click', loadMarks);
+    updateStageUI();
+  });
+})();
+</script>
+</body>
+</html>
